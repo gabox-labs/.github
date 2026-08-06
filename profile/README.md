@@ -54,7 +54,6 @@ There is no house bankroll and no shared vault. Every buyback a buyer can claim 
 | **Assets** | NFTs and tokenized assets: graded cards, vaulted TCG, blue-chip PFPs |
 | **Money** | USDC everywhere. Backing, bids, tickets, and fees never reprice on a SOL move |
 | **Randomness** | MagicBlock VRF via CPI callback |
-| **Protocol cut** | 1% of each ticket, plus 10% of backing on each sell-back |
 
 ## Status
 
