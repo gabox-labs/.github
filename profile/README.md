@@ -1,71 +1,72 @@
 <div align="center">
 
-# Gabox
+<img src="https://raw.githubusercontent.com/gabox-labs/.github/main/profile/gabox-banner.png" alt="Gabox" width="100%" />
 
 **An onchain gacha for NFTs and tokenized assets, built on one primitive: the backed position.**
 
-[![Chain](https://img.shields.io/badge/chain-Solana-9945FF)](https://solana.com)
-[![Denomination](https://img.shields.io/badge/denomination-USDC-2775CA)](#protocol-at-a-glance)
-[![Randomness](https://img.shields.io/badge/randomness-MagicBlock%20VRF-0A0A0A)](https://www.magicblock.gg)
-[![Status](https://img.shields.io/badge/status-live%20on%20devnet-brightgreen)](#status)
-[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/gabox-labs/docs/blob/main/LICENSE)
+[gabox.fun](https://gabox.fun) · [Docs](https://github.com/gabox-labs/docs) · [hello@gabox.fun](mailto:hello@gabox.fun)
 
-[Documentation](https://github.com/gabox-labs/docs) · [Contact](mailto:hello@hubra.app)
+![Solana](https://img.shields.io/badge/chain-Solana-C7F43A?style=flat-square&labelColor=15170F)
+![USDC](https://img.shields.io/badge/quoted_in-USDC-C7F43A?style=flat-square&labelColor=15170F)
+![MagicBlock VRF](https://img.shields.io/badge/randomness-MagicBlock_VRF-C7F43A?style=flat-square&labelColor=15170F)
+![Devnet](https://img.shields.io/badge/status-live_on_devnet-C7F43A?style=flat-square&labelColor=15170F)
 
 </div>
 
----
+Gabox pools real assets and sells random shots at them. Depositors list items they are willing to part with at a price. Buyers pay a flat ticket for a verifiably random draw at everything inside. The protocol sits in the middle, takes a small cut, and holds no risk of its own.
 
-## What is Gabox?
+One number makes the whole thing work: **backing**, the USDC a depositor locks next to their item. That single number is the item's buyback bid, its draw odds, and the depositor's stake, all at once. Ticket price, draw weights, and exit liquidity all derive from it.
 
-Gabox is a peer-to-peer gacha protocol on Solana. Depositors list real assets in shared pools, buyers pay a fixed ticket price for a verifiably random draw, and every item drawn comes with a guaranteed instant buyback offer.
+## The loop
 
-The entire protocol rests on a single primitive. When a depositor lists an item, they pair it with **backing** — an amount of USDC locked alongside the asset. That one number is simultaneously the item's buyback bid, its draw weight, and the depositor's stake. Ticket pricing, draw odds, and buyback liquidity are all derived from it.
+```mermaid
+flowchart LR
+    A[Depositor lists an asset<br/>and locks USDC backing] --> B[Position joins the pool<br/>draw weight = 1 / backing]
+    B --> C[Buyer pays a flat ticket]
+    C --> D[VRF draws one item]
+    D --> E{Keep or sell back?}
+    E -->|Keep| F[Depositor exits,<br/>backing returned]
+    E -->|Sell back| G[Buyer takes 90% of backing,<br/>item relists]
+    G --> B
 
-## How it works
+    classDef lime fill:#C7F43A,stroke:#7A9A1D,color:#15170F
+    class D,G lime
+```
 
-1. **Deposit** — A depositor lists an NFT or tokenized asset and locks USDC backing next to it: their own statement of the item's value, and the price they stand ready to buy it back at.
-2. **Price** — The pool's ticket price updates automatically: the draw-weighted expected value of the pool (the harmonic mean of all backings) plus a 10% surcharge.
-3. **Draw** — A buyer pays the ticket. MagicBlock VRF selects exactly one position, with probability inversely proportional to its backing — cheap items are drawn constantly, richly backed grails rarely. The item is delivered immediately.
-4. **Keep or sell back** — The buyer has a short settlement window to decide. **Keep** it, and the depositor's backing is returned as they exit. **Sell it back** for 90% of its backing in instant cash, and the item returns to its depositor or is automatically relisted.
+1. **Deposit.** List an NFT or tokenized asset and lock USDC next to it. The backing is your own bid on your own item.
+2. **Price.** The ticket tracks the pool's draw-weighted expected value (the harmonic mean of all backings) plus a 10% surcharge.
+3. **Draw.** MagicBlock VRF picks exactly one position, with odds inverse to its backing. Cheap items hit constantly, richly backed grails rarely. The item lands in the buyer's wallet immediately.
+4. **Keep or sell back.** Keep it and the depositor exits with their backing returned. Or sell it back on the spot for 90% of its backing in cash.
 
-## Why this design matters
+## The house cannot go broke
 
-Most gacha and lootbox mechanics have a house that can lose: if buybacks are promised from a shared vault, one jackpot cash-out can drain it. Gabox removes that failure mode entirely — every buyback is pre-funded by the depositor's own backing, posted before the item ever enters a pool.
+There is no house bankroll and no shared vault. Every buyback a buyer can claim is the depositor's own backing, locked in escrow before the item ever entered the pool. The protocol never promises money it is not already holding on someone's behalf.
 
-| Property | How Gabox achieves it |
-|---|---|
-| **No insolvency risk** | Every possible payout is collateralized by depositor backing before the draw |
-| **No oracle risk** | Prices derive from self-set backing, not floor-price feeds |
-| **Verifiable fairness** | Draws use onchain VRF with published odds |
-| **Guaranteed exit** | Every drawn item can be sold back instantly for 90% of its backing |
+- **No insolvency risk.** Every possible payout is collateralized before the draw.
+- **No oracle risk.** Prices come from self-set backing, not floor-price feeds.
+- **Provable fairness.** Onchain VRF, published odds, snapshot-frozen draws.
+- **Guaranteed exit.** Any drawn item sells back instantly for 90% of its backing.
 
-The protocol holds no float and no vault. It never promises a payout it does not already hold in escrow on someone's behalf — solvency is structural, not a treasury-management problem.
-
-## Protocol at a glance
+## At a glance
 
 | | |
 |---|---|
-| **Assets** | NFTs and tokenized assets (e.g. graded cards, vaulted TCG, blue-chip PFPs) |
-| **Chain** | Solana |
-| **Denomination** | USDC throughout — backing, bids, tickets, and fees are all USD-denominated |
-| **Randomness** | MagicBlock VRF, delivered via CPI callback |
-| **Protocol take** | 1% of each ticket, plus 10% of backing on each sell-back |
+| **Assets** | NFTs and tokenized assets: graded cards, vaulted TCG, blue-chip PFPs |
+| **Money** | USDC everywhere. Backing, bids, tickets, and fees never reprice on a SOL move |
+| **Randomness** | MagicBlock VRF via CPI callback |
+| **Protocol cut** | 1% of each ticket, plus 10% of backing on each sell-back |
 
 ## Status
 
-The program is **code-complete and live on devnet**, with real draws settled against the MagicBlock VRF oracle end to end: backed positions with buffers, harmonic-mean pricing, keep-or-sell-back settlement, the five-rank crown board, and the full failure-path machinery.
+> [!TIP]
+> The program is code-complete and **live on devnet**, settling real draws against the real MagicBlock VRF oracle: backed positions, harmonic-mean pricing, keep-or-sell-back settlement, the five-rank crown board, and the full failure-path machinery.
 
-Mainnet follows external code review and a Squads multisig upgrade authority. See the [roadmap](https://github.com/gabox-labs/docs/blob/main/roadmap.mdx) for what ships when.
+Mainnet follows external code review and a Squads multisig upgrade authority. The [roadmap](https://github.com/gabox-labs/docs/blob/main/roadmap.mdx) has the full rollout.
 
-## Repositories
+---
 
-| Repository | Description |
-|---|---|
-| [`docs`](https://github.com/gabox-labs/docs) | Protocol documentation: mechanism, pricing, economics, safety, and roadmap |
+<div align="center">
 
-Additional repositories will be opened as the protocol approaches mainnet.
+Questions, feedback, grails to list: [hello@gabox.fun](mailto:hello@gabox.fun)
 
-## Contact
-
-Questions or feedback: [hello@hubra.app](mailto:hello@hubra.app)
+</div>
