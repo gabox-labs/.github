@@ -61,7 +61,7 @@ Each coin starts on a **Meteora DBC bonding curve** and trades in a **Meteora DA
 ## Status
 
 > [!NOTE]
-> The Meteora version is deployed on **Solana devnet**. [gabox.fun](https://gabox.fun) is currently a wallet-gated preview. The [deployment record](https://github.com/gabox-labs/gabox-program/blob/main/DEPLOYMENT.md) lists the deployed build and remaining launch work.
+> The Meteora Gabox program and transfer hook are deployed on **Solana devnet and mainnet**. [gabox.fun](https://gabox.fun) is currently a wallet-gated devnet preview; its mainnet cutover is pending. The [deployment record](https://github.com/gabox-labs/gabox-program/blob/main/DEPLOYMENT.md) lists the deployed builds and remaining launch work.
 
 Building with Gabox? Start with the [onchain program](https://github.com/gabox-labs/gabox-program) and [TypeScript SDK](https://github.com/gabox-labs/gabox-sdk).
 
