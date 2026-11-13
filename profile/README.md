@@ -6,69 +6,83 @@
 
 # Gabox
 
-**Launch a coin. Build its machine. Open a pack and see what you pull.**
+**Gacha machines for Solana coins. Open a pack, win the coin, check every roll onchain.**
 
-[gabox.fun](https://gabox.fun) · [Program](https://github.com/gabox-labs/gabox-program) · [TypeScript SDK](https://github.com/gabox-labs/gabox-sdk) · [hello@gabox.fun](mailto:hello@gabox.fun)
+[gabox.fun](https://gabox.fun) · [Docs](https://docs.gabox.fun) · [Developers](https://gabox.fun/developers) · [Agent skill](https://github.com/gabox-labs/skills) · [hello@gabox.fun](mailto:hello@gabox.fun)
 
 ![Solana](https://img.shields.io/badge/chain-Solana-C7F43A?style=flat-square&labelColor=15170F)
 ![Meteora](https://img.shields.io/badge/market-Meteora-C7F43A?style=flat-square&labelColor=15170F)
 ![MagicBlock VRF](https://img.shields.io/badge/randomness-MagicBlock_VRF-C7F43A?style=flat-square&labelColor=15170F)
-![Devnet](https://img.shields.io/badge/status-devnet_preview-C7F43A?style=flat-square&labelColor=15170F)
+![Mainnet](https://img.shields.io/badge/status-live_on_mainnet-C7F43A?style=flat-square&labelColor=15170F)
 
 </div>
 
-Gabox is a marketplace of onchain gacha machines. Each machine belongs to a newly launched coin. Creators choose the prize tiers and odds; buyers open packs to win that coin. The price of a pack follows the coin's market, and the prize comes from tokens already in the machine's vault.
+Gabox is a marketplace of onchain gacha machines. Every machine holds one coin. You open a pack at a fixed USDC price, MagicBlock VRF picks a prize from the machine's public table, and the prize is paid in that coin.
+
+## Two kinds of machine
+
+| | New-coin machine | Fan coin machine |
+| --- | --- | --- |
+| The coin | Launched with the machine, in one transaction | A coin that already trades, like BONK or JUP |
+| Market | Meteora bonding curve, then a DAMM v2 pool | Wherever the coin already trades |
+| Snipers | Blocked: until graduation, only packs can buy on the curve | Not relevant: the coin trades openly |
+| Top prize | 3× to 20× the pack, chosen at launch | 3× to 100× the pack, chosen at launch |
+| Creator earns | Part of the trading fee | 1.20% of every pack (1.50% with no referrer) |
+| Pack fee | 0.50% | 2% |
 
 ## The loop
 
 ```mermaid
 flowchart LR
-    A[Creator launches a coin<br/>and funds its machine] --> B[Buyer sees the live<br/>price, prizes, and odds]
-    B --> C[Buyer opens<br/>1–5 packs]
-    C --> D[MagicBlock VRF<br/>selects each prize]
+    A[Creator launches a machine<br/>and seeds its prize pool] --> B[Buyer sees the pack price,<br/>prizes and odds]
+    B --> C[Buyer opens a pack]
+    C --> D[MagicBlock VRF<br/>picks the prize]
     D --> E{Keep or sell?}
     E -->|Keep| F[Coins stay<br/>in the wallet]
-    E -->|Sell| G[Trade at the<br/>current market price]
+    E -->|Sell| G[Trade at the<br/>market price]
 
     classDef lime fill:#C7F43A,stroke:#7A9A1D,color:#15170F
     class C,D lime
 ```
 
-1. **Launch.** Create a new coin and its machine in one transaction. Set the prize tiers and odds, then seed the vault so the first prizes can be paid.
-2. **Choose.** Browse machines and see the current pack price, prize amounts, and odds before buying. A pack buys a fixed amount of the machine's coin from its market.
-3. **Open.** Buy up to five packs at once. MagicBlock VRF picks a tier for each one, and the prize coins land in your wallet.
-4. **Keep or sell.** Hold the coins or sell them through the coin's market at its current price.
+1. **Launch.** Launch a new coin and its machine in one transaction, or open a machine on a coin that already trades. Pick the top prize and seed the prize pool.
+2. **Choose.** Packs cost $10, $50, $200, $500 or $1,000 in USDC. On a new coin, the $1,000 pack unlocks after graduation. The pack's USDC buys the coin, and those coins go into the prize pool.
+3. **Open.** MagicBlock VRF picks a prize row. The prize is a multiple of the coins your pack bought, paid to your wallet.
+4. **Keep or sell.** Hold the coins, or sell them at the market price.
 
 ## How the machine stays honest
 
-- **Odds are public.** The creator's weighted prize tiers are fixed when the machine launches.
-- **Prizes are funded.** Before the draw, Gabox caps the displayed prizes to available vault inventory and reserves enough tokens for the purchase.
-- **The draw is frozen.** Its tiers and available inventory are snapshotted when you buy, so a later purchase cannot change the rules for your packs.
-- **The result is checkable.** MagicBlock VRF supplies the randomness, and onchain events record the inputs and outcome of each purchase.
-
-Each coin starts on a **Meteora DBC bonding curve** and trades in a **Meteora DAMM v2 pool** after graduation. Market prices can move, and a pack can return fewer tokens or less market value than it cost.
+- **Odds are public.** Each machine's prize table is fixed at launch. The admin can raise a table's average payout, never lower it.
+- **Prizes are funded.** Every pack reserves its own coins before the draw. One draw can never spend the coins another draw holds.
+- **The draw is frozen.** Your pack keeps the table and prize pool snapshot from the moment you bought.
+- **The result is checkable.** MagicBlock VRF supplies the randomness, and onchain events record the inputs and the outcome of every draw.
+- **The seed stays.** A creator can never take back the seed or the coins packs added.
 
 ## At a glance
 
 | | |
 | --- | --- |
-| **What you open** | Packs of a newly launched coin |
-| **Pack size** | 1,000,000 tokens, or 0.1% of the coin's initial supply |
-| **Prizes** | Up to eight weighted tiers, set at launch |
+| **Pack prices** | $10 · $50 · $200 · $500 · $1,000 (USDC) |
+| **Prizes** | Up to 8 rows, set at launch; up to 100× the pack |
+| **Average payout** | About 0.955× the pack's coins on the app's tables. A pack is a game, not an investment. |
 | **Randomness** | MagicBlock VRF |
-| **Market** | Meteora DBC, then Meteora DAMM v2 |
+| **Market** | Meteora DBC, then Meteora DAMM v2, or the coin's own market |
 
 ## Status
 
-> [!NOTE]
-> The Meteora Gabox program and transfer hook are deployed on **Solana devnet and mainnet**. [gabox.fun](https://gabox.fun) is currently a wallet-gated devnet preview; its mainnet cutover is pending. The [deployment record](https://github.com/gabox-labs/gabox-program/blob/main/DEPLOYMENT.md) lists the deployed builds and remaining launch work.
+Gabox is **live on Solana mainnet**. The program and transfer hook run the same source on mainnet and devnet:
 
-Building with Gabox? Start with the [onchain program](https://github.com/gabox-labs/gabox-program) and [TypeScript SDK](https://github.com/gabox-labs/gabox-sdk).
+| | Address |
+| --- | --- |
+| Gabox program | `GaBoxR9nYcK1zeu8EvSJVHV3SrYpCFmvbh2MLgobMcUA` |
+| Gabox transfer hook | `GaHokC2ogWdrH8FZkq9qssUaRhWktF3uc4HPbfRtFqfL` |
+
+See [Deployment status](https://docs.gabox.fun/status-and-addresses) and [Risks](https://docs.gabox.fun/risks) before you buy.
 
 ---
 
 <div align="center">
 
-Questions, feedback, or a coin you want to launch? [hello@gabox.fun](mailto:hello@gabox.fun)
+Questions, feedback, or a coin you want a machine for? [hello@gabox.fun](mailto:hello@gabox.fun)
 
 </div>
